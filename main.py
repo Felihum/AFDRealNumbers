@@ -1,99 +1,89 @@
-import time
+DIGITS = [
+    '0',
+    '1', 
+    '2', 
+    '3', 
+    '4', 
+    '5', 
+    '6', 
+    '7', 
+    '8', 
+    '9'
+]
 
-DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+ALPHABET = [
+    '0',
+    '1', 
+    '2', 
+    '3', 
+    '4', 
+    '5', 
+    '6', 
+    '7', 
+    '8', 
+    '9',
+    "+",
+    "-",
+    ".",
+    "e"
+]
+
+STATES = [
+    'e0',
+    'e1',
+    'e2',
+    'e3',
+    'e4',
+    'e5',
+    'e6',
+    'e7'
+]
+
+FINAL_STATES = [
+    STATES[1],
+    STATES[4],
+    STATES[6],
+]
+
+transitions = {
+    (STATES[0], '+'): STATES[2],
+    (STATES[0], '-'): STATES[2],
+    (STATES[1], 'e'): STATES[5],
+    (STATES[1], '.'): STATES[3],
+    (STATES[4], 'e'): STATES[5],
+    (STATES[5], '+'): STATES[7],
+    (STATES[5], '-'): STATES[7],
+}
+for d in DIGITS:
+    transitions[STATES[0], d] = STATES[1]
+    transitions[STATES[1], d] = STATES[1]
+    transitions[STATES[2], d] = STATES[1]
+    transitions[STATES[3], d] = STATES[4]
+    transitions[STATES[4], d] = STATES[4]
+    transitions[STATES[5], d] = STATES[6]
+    transitions[STATES[6], d] = STATES[6]
+    transitions[STATES[7], d] = STATES[6]
 
 def recognizeNumber(number: str):
-    # ----------------Number Normalization----------------
+    number_chars = [c for c in number]
 
-    number_formated = number.replace(" ", "")
-    number_chars = [c for c in number_formated]
-
-    #-----------------------------------------------------
-
-    state = 0
-    isFinal = False
+    current_state = STATES[0]
 
     for char in number_chars:
-        if state == 0:
-            isFinal = False
-            if findInDigits(char):
-                state = 1
-            elif char == '+' | char == '-':
-                state = 2
-            else:
-                return False
-            
-        elif state == 1:
-            isFinal = True
-            if findInDigits(char):
-                state = 1
-            elif char == '.':
-                state = 3
-            elif char == 'e':
-                state = 5
-            else:
-                return False
-            
-        elif state == 2:
-            isFinal = False
-            if findInDigits(char):
-                state = 1
-            else:
-                return False
-            
-        elif state == 3:
-            isFinal = False
-            if findInDigits(char):
-                state = 4
-            else:
-                return False
-            
-        elif state == 4:
-            isFinal = True
-            if findInDigits(char):
-                state = 4
-            elif char == 'e':
-                state = 5
-            else:
-                return False
-            
-        elif state == 5:
-            isFinal = False
-            if findInDigits(char):
-                state = 6
-            elif char == '+' | char == '-':
-                state = 7
-            else:
-                return False
-            
-        elif state == 6:
-            isFinal = True
-            if findInDigits(char):
-                state = 6
-            else:
-                return False
-            
-        elif state == 7:
-            isFinal = False
-            if findInDigits(char):
-                state = 6
-            else:
-                return False
-            
-    return isFinal
+        if not findInAlpha(char):
+            return False
 
-def findInDigits(char):
-    for d in DIGITS:
-        if char == d:
+        current_state = transitions[current_state, char]
+
+    for state in FINAL_STATES:
+        if current_state == state:
             return True
-    
     return False
 
-start = time.process_time()
+def findInAlpha(char):
+    for c in ALPHABET:
+        if char == c:
+            return True
+    return False
 
-print(recognizeNumber("25"))
-
-end: float = time.process_time()
-end = str(end)+"s".replace(" ", "")
-
-print("Process Time: ", end)
+print(recognizeNumber('2.123e445'))
